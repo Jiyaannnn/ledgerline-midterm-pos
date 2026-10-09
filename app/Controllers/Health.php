@@ -21,9 +21,10 @@ class Health extends Controller
                 $cause = $cause->getPrevious();
             }
             error_log(sprintf(
-                'Database health check failed: %s (code %d).',
+                'Database health check failed: %s (code %d, mysqli %d).',
                 $cause::class,
-                (int) $cause->getCode()
+                (int) $cause->getCode(),
+                function_exists('mysqli_connect_errno') ? mysqli_connect_errno() : 0
             ));
             return service('response')->setStatusCode(503)->setContentType('text/plain')->setBody('unavailable');
         }
