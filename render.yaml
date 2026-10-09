@@ -9,7 +9,6 @@ services:
     dockerContext: .
     autoDeployTrigger: "off"
     healthCheckPath: /health
-    maxShutdownDelaySeconds: 30
     envVars:
       - key: CI_ENVIRONMENT
         value: production

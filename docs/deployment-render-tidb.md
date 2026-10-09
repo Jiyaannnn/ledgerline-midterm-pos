@@ -5,7 +5,7 @@ This repository is prepared for a **later guided deployment session**. The deplo
 ## What is prepared
 
 - `Dockerfile` installs production Composer dependencies and the PHP `mysqli`, `intl`, `mbstring`, and `gd` extensions. Apache serves only `public/`.
-- `render.yaml` describes a Render Docker web service with automatic deploys off and an HTTP health check at `/health`.
+- `render.yaml` describes a **Free** Render Docker web service with automatic deploys off and an HTTP health check at `/health`. It omits paid-plan settings such as a custom shutdown delay and a persistent disk.
 - The container binds to Render's `PORT` on all interfaces. Its startup script only starts Apache; it never changes the database.
 - `DB_*` environment variables select the TiDB connection. `DB_TLS=true` enables certificate-verified TLS using the CA bundle path in `DB_SSL_CA`.
 - `APP_BASE_URL` or Render's `RENDER_EXTERNAL_URL` sets absolute links. `CI_ENVIRONMENT=production` hides debug output and enables secure cookies.
@@ -75,7 +75,7 @@ On macOS, a container cannot reach the host's MySQL service at `127.0.0.1`; the 
 
 Render's free service filesystem is ephemeral. Product and staff image uploads are therefore disabled in production. Bundled SVG product art and illustrated staff portraits remain available. A future durable object-storage integration is needed before enabling cloud uploads. Existing local uploads are excluded from Git and will not appear on Render. File-backed login sessions may end after a cold start or redeploy; users can sign in again.
 
-Render free web services can spin down when idle and take time to wake. TiDB Cloud Starter has free usage quotas for storage and request units; exceeding a free limit can throttle or block operations. Check the provider dashboards and current plan terms during deployment.
+Render free web services can spin down when idle and take time to wake. Render may also suspend a free service that initiates unusually high traffic to an external database; keep this class demo's usage modest. TiDB Cloud Starter has free usage quotas for storage and request units; exceeding a free limit can throttle or block operations. Check the provider dashboards and current plan terms during deployment.
 
 ## Troubleshooting in the deployment session
 
@@ -85,6 +85,7 @@ Render free web services can spin down when idle and take time to wake. TiDB Clo
 - **Cookies or redirects look wrong:** confirm `CI_ENVIRONMENT=production` and the public HTTPS base URL. Render terminates HTTPS and forwards `X-Forwarded-Proto: https`; Apache marks those requests secure before CodeIgniter sends secure cookies. A direct plain-HTTP production request is intentionally unsupported.
 - **Images disappear:** local uploaded files are not persistent on Render. Use bundled images until durable storage is implemented.
 - **Build fails:** check Render Docker logs and that Composer can install from `composer.lock`; no runtime dependency should require the local `vendor/` folder.
+- **Blueprint reports a paid-plan field:** pull the latest `main` branch before retrying. The Free Blueprint must not include `maxShutdownDelaySeconds` or a persistent disk.
 
 ## Provider documentation
 
