@@ -16,10 +16,14 @@ class Health extends Controller
             // Keep the public response generic, but expose a safe failure category
             // in service logs so deployment issues can be diagnosed without
             // recording credentials, hostnames, or database error messages.
+            $cause = $exception;
+            while ($cause->getPrevious() !== null) {
+                $cause = $cause->getPrevious();
+            }
             error_log(sprintf(
                 'Database health check failed: %s (code %d).',
-                $exception::class,
-                (int) $exception->getCode()
+                $cause::class,
+                (int) $cause->getCode()
             ));
             return service('response')->setStatusCode(503)->setContentType('text/plain')->setBody('unavailable');
         }
