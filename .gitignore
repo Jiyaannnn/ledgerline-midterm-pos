@@ -43,6 +43,7 @@ $RECYCLE.BIN/
 # as it poses a security risk.
 .env
 .env.*
+!.env.example
 .local-credentials
 /.midterm-work/
 ~$*.docx

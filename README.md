@@ -22,10 +22,10 @@ Requirements: PHP 8.2+, Composer, MySQL 8 or MariaDB, and PHP extensions `mysqli
 ```bash
 composer install
 mysql -u root -e 'CREATE DATABASE ledgerline_midterm_pos CHARACTER SET utf8mb4;'
-cp env .env
+cp .env.example .env
 ```
 
-In `.env`, set `CI_ENVIRONMENT = development`, `app.baseURL = 'http://localhost:8080/'`, and the `database.default.*` connection values for `ledgerline_midterm_pos`. Keep `.env` private.
+In `.env`, set the local `DB_*` values and leave `DB_TLS=false`. Keep `.env` private. The older CodeIgniter `database.default.*` settings also remain supported for existing local installations.
 
 For a **fresh database only**, run:
 
@@ -65,4 +65,6 @@ Management routes require a staff session. Write actions use POST and CSRF prote
 
 ## Repository notes
 
-This repository contains source code and sample seeders for local review. It is not a hosted application; GitHub cannot run the PHP/MySQL site by itself. `.env`, local credentials, uploaded files, dependencies, and runtime data are excluded from version control. The professor account has the same management access as other staff accounts, so use a fresh password when deploying to a shared server.
+This repository contains source code and sample seeders. It is not yet a hosted application; GitHub cannot run the PHP/MySQL site by itself. `.env`, local credentials, uploaded files, dependencies, and runtime data are excluded from version control. The professor account has the same management access as other staff accounts, so use a fresh password when deploying to a shared server.
+
+See [Render and TiDB deployment preparation](docs/deployment-render-tidb.md) for the future guided deployment session. No cloud service is created by the files in this repository alone.

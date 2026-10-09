@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+!.env.example
+.local-credentials
+vendor
+tests
+build
+writable/cache/*
+writable/debugbar/*
+writable/logs/*
+writable/session/*
+writable/uploads/*
+public/uploads/*
+.DS_Store
+*.docx

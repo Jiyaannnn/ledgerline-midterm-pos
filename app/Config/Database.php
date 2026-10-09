@@ -195,6 +195,23 @@ class Database extends Config
     {
         parent::__construct();
 
+        // Standard environment keys are easier to set in Render than dotted .env keys.
+        if (($host = getenv('DB_HOST')) !== false && $host !== '') {
+            $this->default['hostname'] = $host;
+            $this->default['port'] = (int) (getenv('DB_PORT') ?: 3306);
+            $this->default['database'] = (string) getenv('DB_NAME');
+            $this->default['username'] = (string) getenv('DB_USER');
+            $this->default['password'] = (string) getenv('DB_PASSWORD');
+            $this->default['DBDriver'] = 'MySQLi';
+            if (filter_var(getenv('DB_TLS') ?: false, FILTER_VALIDATE_BOOLEAN)) {
+                // TiDB Cloud Starter's public endpoint requires certificate-verified TLS.
+                $this->default['encrypt'] = [
+                    'ssl_ca' => (string) (getenv('DB_SSL_CA') ?: '/etc/ssl/certs/ca-certificates.crt'),
+                    'ssl_verify' => true,
+                ];
+            }
+        }
+
         // Ensure that we always set the database group to 'tests' if
         // we are currently running an automated test suite, so that
         // we don't overwrite live data on accident.

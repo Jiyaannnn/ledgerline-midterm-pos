@@ -1,0 +1,16 @@
+<VirtualHost *:@PORT@>
+    ServerName localhost
+    DocumentRoot /var/www/html/public
+    # Render terminates TLS at its edge and forwards the original scheme.
+    SetEnvIfNoCase X-Forwarded-Proto "^https$" HTTPS=on
+    <Directory /var/www/html/public>
+        AllowOverride All
+        Require all granted
+        Options -Indexes
+    </Directory>
+    ErrorLog /proc/self/fd/2
+    CustomLog /proc/self/fd/1 combined
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set X-Frame-Options "SAMEORIGIN"
+</VirtualHost>

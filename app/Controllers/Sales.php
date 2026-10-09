@@ -50,7 +50,8 @@ class Sales extends BaseController
             $db->transCommit();
         } catch (\Throwable $e) {
             $db->transRollback();
-            log_message('error', 'Sale failed: {message}', ['message' => $e->getMessage()]);
+            // The user sees a safe error; production logs never include database details.
+            log_message('error', 'Sale transaction failed.');
             return $this->form($values, ['sale' => 'The sale could not be recorded. Please try again.']);
         }
         return redirect()->to(site_url('sales'))->with('success', 'Sale recorded and stock updated.');

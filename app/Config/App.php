@@ -6,6 +6,15 @@ use CodeIgniter\Config\BaseConfig;
 
 class App extends BaseConfig
 {
+    public function __construct()
+    {
+        parent::__construct();
+        // Render supplies the public HTTPS URL; local .env keeps the existing base URL.
+        $url = getenv('APP_BASE_URL') ?: getenv('RENDER_EXTERNAL_URL');
+        if (is_string($url) && $url !== '') {
+            $this->baseURL = rtrim($url, '/') . '/';
+        }
+    }
     /**
      * --------------------------------------------------------------------------
      * Base Site URL

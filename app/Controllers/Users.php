@@ -72,7 +72,7 @@ class Users extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
         $values = [
-            'username' => trim((string) $this->request->getPost('username')),
+            'username' => strtolower(trim((string) $this->request->getPost('username'))),
             'full_name' => trim((string) $this->request->getPost('full_name')),
         ];
         // is_unique ignores the current row during editing but rejects every other duplicate.
@@ -90,7 +90,11 @@ class Users extends BaseController
         }
         $upload = $this->request->getFile('avatar');
         $hasUpload = $upload !== null && $upload->getError() !== UPLOAD_ERR_NO_FILE;
-        if ($hasUpload) {
+        if ($hasUpload && ENVIRONMENT === 'production') {
+            // Local uploads remain available in development; hosting needs durable storage.
+            $errors['avatar'] = 'Profile uploads are unavailable on the hosted demo until durable storage is configured.';
+        }
+        if ($hasUpload && $errors === []) {
             // Framework rules inspect the actual image, MIME type, and 2 MB size limit.
             $fileRules = ['avatar' => 'uploaded[avatar]|is_image[avatar]|mime_in[avatar,image/jpeg,image/png]|max_size[avatar,2048]'];
             if (! $this->validateData([], $fileRules)) {

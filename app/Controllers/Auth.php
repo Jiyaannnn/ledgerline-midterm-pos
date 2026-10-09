@@ -7,7 +7,7 @@ class Auth extends BaseController {
         return view('auth/login', ['title' => 'Staff sign in', 'activePage' => 'login', 'error' => null, 'username' => '', 'notice' => session()->get('auth_notice')]);
     }
     public function attempt() {
-        $username = trim((string) $this->request->getPost('username'));
+        $username = strtolower(trim((string) $this->request->getPost('username')));
         $password = (string) $this->request->getPost('password');
         $user = $username === '' ? null : (new UserModel())->where('username', $username)->where('is_archived', 0)->first();
         // Verify the stored hash; never compare or store a plain text password.

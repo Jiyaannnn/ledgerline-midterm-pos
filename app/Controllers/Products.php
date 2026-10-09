@@ -50,7 +50,11 @@ class Products extends BaseController
         if (! $this->validateData($values, $rules)) $errors = $this->validator->getErrors();
         $upload = $this->request->getFile('image');
         $hasUpload = $upload !== null && $upload->getError() !== UPLOAD_ERR_NO_FILE;
-        if ($hasUpload && ! $this->validateData([], ['image' => 'uploaded[image]|is_image[image]|mime_in[image,image/jpeg,image/png]|max_size[image,2048]'])) {
+        if ($hasUpload && ENVIRONMENT === 'production') {
+            // Render's filesystem is temporary; never accept an image we cannot retain.
+            $errors['image'] = 'Image uploads are unavailable on the hosted demo until durable storage is configured.';
+        }
+        if ($hasUpload && $errors === [] && ! $this->validateData([], ['image' => 'uploaded[image]|is_image[image]|mime_in[image,image/jpeg,image/png]|max_size[image,2048]'])) {
             $errors = array_merge($errors, $this->validator->getErrors());
         }
         if ($errors !== []) return $this->form($product, $values, $errors);
