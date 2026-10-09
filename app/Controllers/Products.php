@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Models\ProductModel;
+use App\Libraries\ImageStorage;
 use CodeIgniter\Exceptions\PageNotFoundException;
 
 class Products extends BaseController
@@ -50,31 +51,28 @@ class Products extends BaseController
         if (! $this->validateData($values, $rules)) $errors = $this->validator->getErrors();
         $upload = $this->request->getFile('image');
         $hasUpload = $upload !== null && $upload->getError() !== UPLOAD_ERR_NO_FILE;
-        if ($hasUpload && ENVIRONMENT === 'production') {
-            // Render's filesystem is temporary; never accept an image we cannot retain.
-            $errors['image'] = 'Image uploads are unavailable on the hosted demo until durable storage is configured.';
-        }
-        if ($hasUpload && $errors === [] && ! $this->validateData([], ['image' => 'uploaded[image]|is_image[image]|mime_in[image,image/jpeg,image/png]|max_size[image,2048]'])) {
+        if ($hasUpload && ! $this->validateData([], ['image' => 'uploaded[image]|is_image[image]|mime_in[image,image/jpeg,image/png]|max_size[image,2048]'])) {
             $errors = array_merge($errors, $this->validator->getErrors());
         }
         if ($errors !== []) return $this->form($product, $values, $errors);
         if ($hasUpload) {
-            $directory = FCPATH . 'uploads/products/';
-            if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) throw new \RuntimeException('Product image directory could not be created.');
-            $filename = bin2hex(random_bytes(16)) . '.jpg';
             try {
-                // Convert and bound the image for consistent display; generated names avoid collisions.
-                service('image')->withFile($upload->getTempName())->fit(960, 720, 'center')->convert(IMAGETYPE_JPEG)->save($directory . $filename, 82);
+                $values['image'] = (new ImageStorage())->store($upload, 'products', 960, 720);
             } catch (\Throwable $e) {
-                log_message('error', 'Product image preparation failed: {message}', ['message' => $e->getMessage()]);
-                return $this->form($product, $values, ['image' => 'Choose another JPG or PNG image.']);
+                log_message('error', 'Product image preparation failed.');
+                return $this->form($product, $values, ['image' => 'The image could not be stored. Choose another JPG or PNG.']);
             }
-            $values['image'] = 'uploads/products/' . $filename;
         }
         if ($id === null) {
             $values['created_at'] = date('Y-m-d H:i:s');
             $model->insert($values);
-        } else $model->update($id, $values);
+        } else {
+            $model->update($id, $values);
+            if ($hasUpload && ! empty($product['image'])) {
+                // Replacing an image releases its previous database or local file storage.
+                (new ImageStorage())->delete($product['image']);
+            }
+        }
         return redirect()->to(site_url('products'))->with('success', $id ? 'Product updated.' : 'Product created.');
     }
 }

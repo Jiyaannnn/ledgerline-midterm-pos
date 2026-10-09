@@ -9,6 +9,7 @@ Midterm group: **Jian Edward Acob, Howard Mac Callanta, and Gerard Eric Doroja**
 - Product create, list, edit, and archive; validated JPG/PNG upload prepared as a display-sized JPEG
 - Customer and staff create, list, edit, and delete; linked records are archived to preserve sales history
 - Staff avatar upload, password hashing, sign-in, and protected management routes
+- On Render, prepared uploads are stored in TiDB so they survive service restarts; local development keeps files on disk
 - Separate group-member accounts and a professor demo account for local assessment
 - Checkout with an optional customer, server-calculated total, and a database transaction that decreases stock
 - Clear rejection when quantity is invalid or exceeds available stock

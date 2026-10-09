@@ -9,7 +9,7 @@ This repository is prepared for a **later guided deployment session**. The deplo
 - The container binds to Render's `PORT` on all interfaces. Its startup script only starts Apache; it never changes the database.
 - `DB_*` environment variables select the TiDB connection. `DB_TLS=true` enables certificate-verified TLS using the CA bundle path in `DB_SSL_CA`.
 - `APP_BASE_URL` or Render's `RENDER_EXTERNAL_URL` sets absolute links. `CI_ENVIRONMENT=production` hides debug output and enables secure cookies.
-- Local product and staff image uploads still work. Hosted production upload inputs and upload requests are disabled until durable storage is implemented. Bundled illustrations and catalogue images still display.
+- Product and staff image uploads remain available on the hosted demo. The app converts valid JPG/PNG files to bounded JPEGs and stores production image bytes in TiDB's `uploaded_images` table. Local development keeps images on disk.
 
 ## Required settings for the future session
 
@@ -43,7 +43,7 @@ php spark migrate --all
 php spark migrate:status
 ```
 
-CodeIgniter records applied migrations, so repeating `migrate --all` applies only new ones. Do not use `migrate:refresh`, `migrate:rollback`, or destructive resets on the live database. Verify the schema on TiDB Cloud before deploying the Render service. The existing migrations use ordinary MySQL-compatible integer, varchar, date, decimal, boolean, and foreign-key definitions. They use lowercase table and column identifiers. Staff usernames are normalized to lowercase in the app, so uniqueness is stable even when collations differ. Checkout uses a transaction and a `SELECT ... FOR UPDATE` lock; this still needs a real TiDB smoke test in the deployment session.
+CodeIgniter records applied migrations, so repeating `migrate --all` applies only new ones. Do not use `migrate:refresh`, `migrate:rollback`, or destructive resets on the live database. Verify the schema on TiDB Cloud before deploying the Render service, including the new `uploaded_images` table. The migrations use MySQL-compatible types, including `MEDIUMBLOB` for prepared JPEGs. They use lowercase table and column identifiers. Staff usernames are normalized to lowercase in the app, so uniqueness is stable even when collations differ. Checkout uses a transaction and a `SELECT ... FOR UPDATE` lock; this still needs a real TiDB smoke test in the deployment session.
 
 For a **new, empty database only**, optional demo data can be added once. Set four **new, distinct** passwords of at least 12 characters as private environment variables before running the first seeder:
 
@@ -73,9 +73,9 @@ On macOS, a container cannot reach the host's MySQL service at `127.0.0.1`; the 
 
 ## Files, sessions, and free-tier limits
 
-Render's free service filesystem is ephemeral. Product and staff image uploads are therefore disabled in production. Bundled SVG product art and illustrated staff portraits remain available. A future durable object-storage integration is needed before enabling cloud uploads. Existing local uploads are excluded from Git and will not appear on Render. File-backed login sessions may end after a cold start or redeploy; users can sign in again.
+Render's free service filesystem is ephemeral. Uploaded product images and staff avatars are therefore converted to JPEGs and saved in TiDB, then served from `/media/{id}`. The form accepts JPG/PNG files up to 2 MB; prepared images also have a 2 MB cap. Replacing an image removes its previous stored copy. Existing local uploads are excluded from Git and will not appear on Render; move those files separately if their records are migrated. Bundled SVG product art and illustrated staff portraits remain available. File-backed login sessions may end after a cold start or redeploy; users can sign in again.
 
-Render free web services can spin down when idle and take time to wake. Render may also suspend a free service that initiates unusually high traffic to an external database; keep this class demo's usage modest. TiDB Cloud Starter has free usage quotas for storage and request units; exceeding a free limit can throttle or block operations. Check the provider dashboards and current plan terms during deployment.
+Render free web services can spin down when idle and take time to wake. Render may also suspend a free service that initiates unusually high traffic to an external database; keep this class demo's usage modest. TiDB Cloud Starter has free usage quotas for storage and request units; image uploads and views count toward them. Keep only a small set of demo images and monitor usage. Exceeding a free limit can throttle or block operations. Check the provider dashboards and current plan terms during deployment.
 
 ## Troubleshooting in the deployment session
 
@@ -83,7 +83,8 @@ Render free web services can spin down when idle and take time to wake. Render m
 - **The app shows a database/table error:** run and inspect migrations on the intended TiDB database; the Docker startup deliberately does not create tables.
 - **Sign-in fails on a fresh database:** seed once with new passwords, or create accounts through a controlled bootstrap path. GitHub does not contain local account password hashes.
 - **Cookies or redirects look wrong:** confirm `CI_ENVIRONMENT=production` and the public HTTPS base URL. Render terminates HTTPS and forwards `X-Forwarded-Proto: https`; Apache marks those requests secure before CodeIgniter sends secure cookies. A direct plain-HTTP production request is intentionally unsupported.
-- **Images disappear:** local uploaded files are not persistent on Render. Use bundled images until durable storage is implemented.
+- **New image upload fails:** confirm `uploaded_images` exists, database quota remains, and the file is a JPG/PNG no larger than 2 MB. Uploaded images are stored in TiDB on Render, not in its local filesystem.
+- **Older images disappear:** image paths from the local development database refer to files excluded from Git. Migrate those files separately or upload them again through the hosted forms.
 - **Build fails:** check Render Docker logs and that Composer can install from `composer.lock`; no runtime dependency should require the local `vendor/` folder.
 - **Blueprint reports a paid-plan field:** pull the latest `main` branch before retrying. The Free Blueprint must not include `maxShutdownDelaySeconds` or a persistent disk.
 

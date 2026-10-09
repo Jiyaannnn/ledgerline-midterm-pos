@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Libraries\ImageStorage;
 
 class Users extends BaseController
 {
@@ -55,9 +56,8 @@ class Users extends BaseController
             $message = 'Staff removed from the active directory; past sales remain intact.';
         } else {
             $model->delete($id);
-            if (! empty($user['avatar']) && str_starts_with($user['avatar'], 'uploads/avatars/')) {
-                $avatarPath = FCPATH . $user['avatar'];
-                if (is_file($avatarPath)) unlink($avatarPath);
+            if (! empty($user['avatar'])) {
+                (new ImageStorage())->delete($user['avatar']);
             }
             $message = 'Staff account deleted.';
         }
@@ -90,11 +90,7 @@ class Users extends BaseController
         }
         $upload = $this->request->getFile('avatar');
         $hasUpload = $upload !== null && $upload->getError() !== UPLOAD_ERR_NO_FILE;
-        if ($hasUpload && ENVIRONMENT === 'production') {
-            // Local uploads remain available in development; hosting needs durable storage.
-            $errors['avatar'] = 'Profile uploads are unavailable on the hosted demo until durable storage is configured.';
-        }
-        if ($hasUpload && $errors === []) {
+        if ($hasUpload) {
             // Framework rules inspect the actual image, MIME type, and 2 MB size limit.
             $fileRules = ['avatar' => 'uploaded[avatar]|is_image[avatar]|mime_in[avatar,image/jpeg,image/png]|max_size[avatar,2048]'];
             if (! $this->validateData([], $fileRules)) {
@@ -109,27 +105,22 @@ class Users extends BaseController
             $values['password'] = password_hash($values['password'], PASSWORD_DEFAULT);
         }
         if ($hasUpload) {
-            $directory = FCPATH . 'uploads/avatars/';
-            if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
-                throw new \RuntimeException('Avatar upload directory could not be created.');
-            }
-            $filename = bin2hex(random_bytes(16)) . '.jpg';
-            $path = $directory . $filename;
             try {
-                // A bounded JPEG thumbnail is consistent for display and strips source metadata.
-                service('image')->withFile($upload->getTempName())->fit(320, 320, 'center')->convert(IMAGETYPE_JPEG)->save($path, 82);
+                $values['avatar'] = (new ImageStorage())->store($upload, 'avatars', 320, 320);
             } catch (\Throwable $exception) {
-                log_message('error', 'Avatar preparation failed: {message}', ['message' => $exception->getMessage()]);
-                $errors['avatar'] = 'The image could not be prepared. Please choose another JPG or PNG.';
+                log_message('error', 'Avatar preparation failed.');
+                $errors['avatar'] = 'The image could not be stored. Please choose another JPG or PNG.';
                 return view('users/form', ['title' => $id ? 'Edit User' : 'New User', 'activePage' => 'users', 'user' => $user, 'errors' => $errors, 'values' => $values]);
             }
-            $values['avatar'] = 'uploads/avatars/' . $filename;
         }
         if ($id === null) {
             $values['created_at'] = date('Y-m-d H:i:s');
             $model->insert($values);
         } else {
             $model->update($id, $values);
+            if ($hasUpload && ! empty($user['avatar'])) {
+                (new ImageStorage())->delete($user['avatar']);
+            }
         }
         return redirect()->to(site_url('users'))->with('success', $id ? 'User updated.' : 'User created.');
     }
