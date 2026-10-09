@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Illustrated portrait of a professor">
+<rect width="512" height="512" fill="#e6e8dc"/>
+<circle cx="401" cy="100" r="66" fill="#b6d7b4"/>
+<path d="M0 398h512" stroke="#173341" stroke-opacity=".12" stroke-width="3"/>
+<path d="M66 512c9-118 79-177 190-177s181 59 190 177" fill="#26495b"/>
+<path d="M202 338l54 92 54-92 25 174H177Z" fill="#f7f4e7"/>
+<rect x="219" y="287" width="74" height="74" rx="25" fill="#ad7658"/>
+<ellipse cx="256" cy="213" rx="111" ry="129" fill="#ad7658"/>
+<path d="M145 204c-11-99 35-157 111-157 77 0 123 59 111 157-23-31-45-46-66-56-51 18-102 16-156 56Z" fill="#39454a"/>
+<path d="M193 228q17-11 35-3m56 0q18-8 37 3" fill="none" stroke="#5e453b" stroke-width="7" stroke-linecap="round"/>
+<circle cx="214" cy="246" r="6" fill="#23313a"/><circle cx="299" cy="246" r="6" fill="#23313a"/>
+<path d="M256 253l-7 34 15 3m-36 19q28 17 57 0" fill="none" stroke="#804b3e" stroke-width="6" stroke-linecap="round"/>
+<path d="M178 213h67v51h-67zm89 0h67v51h-67zm-22 17h22" fill="none" stroke="#173341" stroke-width="8" stroke-linejoin="round"/>
+<path d="M62 507h388" stroke="#173341" stroke-opacity=".16" stroke-width="5"/>
+</svg>

@@ -1,0 +1,8 @@
+<?= $this->extend('layouts/main') ?>
+<?= $this->section('content') ?>
+<section class="inner-hero"><div class="inner-hero-copy"><p class="eyebrow"><span class="eyebrow-dot"></span> The shop / inventory</p><h1>Good stock. <em>Good work.</em></h1><p>Keep every counter essential priced, pictured, and ready to sell.</p></div><?= view('components/hero_art', ['kind' => 'products']) ?></section>
+<section class="listing-section"><div class="section-top"><div><p class="eyebrow">Product inventory</p><h2><?= count($products) ?> active products<span class="heading-period">.</span></h2></div><a class="button button-dark" href="<?= site_url('products/new') ?>">+ New product</a></div>
+<?php if ($products === []): ?><p class="empty-state">No products yet. Add one to start selling.</p><?php else: ?><div class="product-grid">
+<?php foreach ($products as $product): ?><article class="product-card"><div class="product-visual"><?php if ($product['image']): ?><img src="<?= base_url($product['image']) ?>" alt="<?= esc($product['name'] . ' product image') ?>"><?php else: ?><span aria-hidden="true">L<span class="heading-period">.</span></span><?php endif ?></div><div class="product-meta"><p class="eyebrow">SKU <?= str_pad((string) $product['id'], 3, '0', STR_PAD_LEFT) ?></p><h3><?= esc($product['name']) ?></h3><strong>₱<?= number_format((float) $product['price'], 2) ?></strong><span class="stock-pill <?= (int) $product['stock_quantity'] === 0 ? 'stock-out' : '' ?>"><?= (int) $product['stock_quantity'] ?> in stock</span><a class="inline-link" href="<?= site_url('products/' . $product['id'] . '/edit') ?>">Edit product ↗</a></div></article><?php endforeach ?>
+</div><?php endif ?></section>
+<?= $this->endSection() ?>

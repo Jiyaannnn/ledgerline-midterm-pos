@@ -1,0 +1,15 @@
+# InfinityFree/shared-hosting entry point for CodeIgniter 4.
+# The hosting account points to this directory, while CodeIgniter's
+# browser-facing front controller remains inside the public directory.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Avoid rewriting a request that has already entered public.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [QSA,L]
+</IfModule>
+
+# Prevent browsers from reading hidden configuration files such as .env.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

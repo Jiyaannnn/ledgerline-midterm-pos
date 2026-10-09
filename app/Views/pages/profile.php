@@ -1,0 +1,7 @@
+<?= $this->extend('layouts/main') ?>
+<?= $this->section('content') ?>
+<section class="inner-hero"><div class="inner-hero-copy"><p class="eyebrow"><span class="eyebrow-dot"></span> THE PEOPLE BEHIND LEDGERLINE</p><h1>Meet the <em>team.</em></h1><p>Three IT0049 group members presenting one shared midterm point-of-sale project.</p></div><?= view('components/hero_art', ['kind' => 'profile']) ?></section>
+<section class="team-section" aria-labelledby="team-title"><div class="section-top"><div><p class="eyebrow">Project group</p><h2 id="team-title">The people behind <em>the counter.</em></h2></div><span class="team-count">03 / MEMBERS</span></div><div class="team-grid">
+<?php foreach ($team as $index => $member): ?><article class="team-card"><div class="team-portrait"><img src="<?= base_url($member['avatar']) ?>" alt="Illustrated portrait representing <?= esc($member['name'], 'attr') ?>" loading="lazy"></div><div class="team-card-copy"><span><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?> / GROUP MEMBER</span><h3><?= esc($member['name']) ?></h3><p>IT0049 · Web System Technologies</p></div></article><?php endforeach ?>
+</div><p class="team-origin">Ledgerline began with Jian’s earlier POS coursework. For the midterm project, it is presented as the group’s shared application by Jian, Howard, and Gerard. The portraits are illustrations, not photographs.</p></section>
+<?= $this->endSection() ?>

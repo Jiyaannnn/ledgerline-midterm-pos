@@ -1,0 +1,16 @@
+<?= $this->extend('layouts/main') ?>
+<?= $this->section('content') ?>
+<?php $editing = $user !== null; ?>
+<section class="inner-hero"><div class="inner-hero-copy"><p class="eyebrow"><span class="eyebrow-dot"></span> Print shop / staff / <?= $editing ? 'edit' : 'new' ?></p><h1><?= $editing ? 'A familiar face,' : 'Plan' ?> <em><?= $editing ? 'fresh details.' : 'the team.' ?></em></h1><p><?= $editing ? 'Update this staff account and its profile picture.' : 'Create a staff account with a unique username.' ?></p></div><?= view('components/hero_art', ['kind' => 'people']) ?></section>
+<section class="form-section"><div class="section-top"><div><p class="eyebrow">Staff directory</p><h2><?= $editing ? 'Edit user' : 'New user' ?><span class="heading-period">.</span></h2></div><a class="inline-link" href="<?= site_url('users') ?>">Back to staff ↗</a></div>
+<form class="account-form" method="post" enctype="multipart/form-data" action="<?= $editing ? site_url('users/' . $user['id']) : site_url('users') ?>" novalidate>
+<?= csrf_field() ?>
+<div class="form-grid">
+<div class="field"><label for="username">Username <span aria-hidden="true">*</span></label><input id="username" name="username" type="text" maxlength="50" required value="<?= esc($values['username'] ?? '') ?>" aria-invalid="<?= isset($errors['username']) ? 'true' : 'false' ?>"><small class="field-error"><?= esc($errors['username'] ?? '') ?></small></div>
+<div class="field"><label for="full_name">Full name <span aria-hidden="true">*</span></label><input id="full_name" name="full_name" type="text" maxlength="100" required value="<?= esc($values['full_name'] ?? '') ?>" aria-invalid="<?= isset($errors['full_name']) ? 'true' : 'false' ?>"><small class="field-error"><?= esc($errors['full_name'] ?? '') ?></small></div>
+<div class="field field-wide"><label for="password">Password <?= $editing ? '<span class="optional">Leave blank to keep current password</span>' : '<span aria-hidden="true">*</span>' ?></label><input id="password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" <?= $editing ? '' : 'required' ?> aria-invalid="<?= isset($errors['password']) ? 'true' : 'false' ?>"><small>Use at least 12 characters. Passwords are stored as hashes.</small><small class="field-error"><?= esc($errors['password'] ?? '') ?></small></div>
+<div class="field field-wide"><label for="avatar">Profile picture <span class="optional">Optional</span></label><input id="avatar" name="avatar" type="file" accept="image/jpeg,image/png" aria-invalid="<?= isset($errors['avatar']) ? 'true' : 'false' ?>"><small>JPG or PNG, up to 2 MB. The image is prepared as a square thumbnail.</small><small class="field-error"><?= esc($errors['avatar'] ?? '') ?></small></div>
+</div>
+<div class="form-actions"><button class="button button-dark" type="submit"><?= $editing ? 'Save changes' : 'Create user' ?></button><a class="button button-outline" href="<?= site_url('users') ?>">Cancel</a></div>
+</form><?php if ($editing): ?><form class="delete-form" method="post" action="<?= site_url('users/' . $user['id'] . '/delete') ?>" onsubmit="return confirm('Remove this staff account? Past sales will remain.');"><?= csrf_field() ?><button class="delete-button" type="submit">Delete staff account</button></form><?php endif ?></section>
+<?= $this->endSection() ?>
